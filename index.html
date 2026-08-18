@@ -1,23 +1,658 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Meu Primeiro Site</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Aprenda HTML — Questionário Interativo</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-            background: #f0f8ff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
         }
-        h1 { color: #2c3e50; }
-        p { color: #34495e; font-size: 18px; }
+
+        /* ========== BOTÕES SUPERIORES — PRONTOS PARA LINK ========== */
+        .botoes-superiores {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .btn-superior {
+            padding: 10px 20px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-superior:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            background: #f3e5f5;
+        }
+        .btn-voltar { border-left: 4px solid #ff9800; }
+        .btn-inicio { border-right: 4px solid #4caf50; }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: fadeInUp 0.6s ease;
+            margin-bottom: 20px;
+        }
+
+        .painel {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .tema {
+            background: #e3f2fd;
+            color: #0d47a1;
+            padding: 10px 18px;
+            border-radius: 30px;
+            display: inline-block;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        .pergunta { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; line-height: 1.5; }
+
+        .opcao {
+            padding: 14px 18px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        .opcao:hover { border-color: #667eea; background: #f3e5f5; transform: translateX(5px); }
+        .opcao.correta { background: #c8e6c9; border-color: #4caf50; animation: acertou 0.5s ease; }
+        .opcao.errada { background: #ffcdd2; border-color: #f44336; animation: errou 0.5s ease; }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .feedback.certo { background: #e8f5e9; border-left: 5px solid #4caf50; color: #2e7d32; }
+        .feedback.errado { background: #ffe0b2; border-left: 5px solid #ff9800; color: #e65100; }
+
+        .desafio { margin-top: 25px; padding: 20px; background: #fff3e0; border-radius: 12px; border-left: 5px solid #ff9800; }
+        .desafio h4 { color: #e65100; margin-bottom: 12px; }
+        .desafio input {
+            width: 100%; padding: 12px; font-size: 1rem; border: 2px solid #ffb74d;
+            border-radius: 8px; margin-bottom: 10px;
+        }
+        .btn {
+            padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white; border: none; border-radius: 8px; cursor: pointer;
+            font-size: 1rem; font-weight: bold; transition: transform 0.2s;
+        }
+        .btn:hover { transform: scale(1.05); }
+        .btn-reiniciar {
+            background: linear-gradient(135deg, #f44336, #e91e63);
+            margin-top: 20px;
+            font-size: 1.1rem;
+            padding: 15px 40px;
+        }
+        .resultado-desafio { margin-top: 10px; font-weight: bold; }
+
+        .progresso { margin: 15px 0; height: 10px; background: #eee; border-radius: 5px; overflow: hidden; }
+        .barra { height: 100%; background: linear-gradient(90deg, #4caf50, #8bc34a); width: 0%; transition: width 0.5s ease; }
+        .estatistica { font-size: 1.1rem; margin: 10px 0; }
+        .numero { font-size: 2rem; font-weight: bold; color: #667eea; }
+        .proxima { margin-top: 20px; display: none; }
+
+        /* TELA DE PARABÉNS */
+        .tela-final { text-align: center; padding: 30px 20px; }
+        .tela-final h2 { font-size: 2.2rem; color: #4caf50; margin-bottom: 20px; }
+        .tela-final .motivacao {
+            background: linear-gradient(135deg, #fff9c4, #fff59d);
+            padding: 20px; border-radius: 12px; margin: 25px 0;
+            border-left: 5px solid #fbc02d; font-size: 1.1rem; line-height: 1.8;
+        }
+        .tela-final .resultado { font-size: 1.3rem; margin: 15px 0; }
+
+        @keyframes fadeInUp { from { opacity:0; transform: translateY(30px); } to { opacity:1; transform: translateY(0); } }
+        @keyframes fadeInDown { from { opacity:0; transform: translateY(-30px); } to { opacity:1; transform: translateY(0); } }
+        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+        @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(25,118,210,0.4);} 70%{box-shadow:0 0 0 10px rgba(25,118,210,0);} 100%{box-shadow:0 0 0 0 rgba(25,118,210,0);} }
+        @keyframes acertou { 0%{transform:scale(1);} 50%{transform:scale(1.02);} 100%{transform:scale(1);} }
+        @keyframes errou { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
+        @keyframes confete {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-50px) rotate(360deg); opacity: 0; }
+        }
+
+        .oculto { display: none !important; }
+        .emoji { font-size: 1.5rem; margin-right: 8px; }
     </style>
 </head>
 <body>
-    <h1>🎉 Olá! Meu Site está no Ar!</h1>
-    <p>Esse site foi publicado usando o GitHub Pages!</p>
-    <p>Qualquer pessoa pode acessar pela URL abaixo 👇</p>
-    <p><strong>https://seunome.github.io/</strong></p>
+
+    <!-- =====================================================
+        BOTÕES PRONTOS PARA COLOCAR LINK!
+        É SÓ SUBSTITUIR O "#" PELO SEU LINK
+    ===================================================== -->
+    <div class="botoes-superiores">
+        <a href="#" class="btn-superior btn-voltar" id="btn-voltar">⬅️ Voltar</a>
+        <a href="#" class="btn-superior btn-inicio" id="btn-inicio">🏠 Retornar ao Início</a>
+    </div>
+
+    <h1>📚 Aprenda HTML — Questionário Interativo 🎯</h1>
+
+    <div class="container">
+        <div id="area-questoes"></div>
+
+        <div class="painel">
+            <h3>📊 Painel de Resultados</h3>
+            <div class="progresso"><div class="barra" id="barra"></div></div>
+            <p class="estatistica">Progresso: <span id="contador">0</span> / <span id="total">16</span></p>
+            <p class="estatistica">✅ Acertos: <span class="numero" id="acertos">0</span></p>
+            <p class="estatistica">❌ Erros: <span class="numero" id="erros">0</span></p>
+            <p class="estatistica">📈 Taxa: <span id="porcentagem">0%</span></p>
+            <hr style="margin:15px 0;">
+            <p style="font-size:0.9rem; color:#666;">💾 Progresso salvo automaticamente!</p>
+        </div>
+    </div>
+
+<script>
+// =====================================================
+// BANCO DE QUESTÕES — DICA SÓ APARECE QUANDO ERRA
+// =====================================================
+const questoes = [
+    {
+        tema: "📘 TEMA 1 — O que é HTML e para que serve",
+        pergunta: "O que significa a sigla HTML e qual é a sua função principal?",
+        opcoes: [
+            { texto: "Hyper Text Markup Language — Estruturar o conteúdo das páginas web", correta: true },
+            { texto: "Home Tool Markup Language — Criar ferramentas para a casa", correta: false },
+            { texto: "Hyperlinks and Text Markup Language — Apenas criar links", correta: false },
+            { texto: "High Tech Modern Language — Programar jogos", correta: false }
+        ],
+        explicacao: "✅ Correto! HTML = Hyper Text Markup Language. É a 'espinha dorsal' de toda página — ele define títulos, textos, imagens, links... a ESTRUTURA.",
+        dicaErro: "💡 Dica: Pense em 'Marcação' = marcar cada parte do conteúdo. HTML não é programação, é marcação de texto e estrutura.",
+        desafio: "Digite a sigla completa da linguagem que estrutura as páginas:",
+        respostaDesafio: "Hyper Text Markup Language",
+        dicaDesafio: "💡 Dica: São 4 palavras. Hyper = Hiper, Text = Texto, Markup = Marcação, Language = Linguagem."
+    },
+    {
+        tema: "📘 TEMA 1 — O que é HTML e para que serve",
+        pergunta: "Qual a melhor definição para o HTML?",
+        opcoes: [
+            { texto: "Uma linguagem de programação que faz cálculos", correta: false },
+            { texto: "Uma linguagem de marcação que define a estrutura do conteúdo", correta: true },
+            { texto: "Um banco de dados para armazenar informações", correta: false },
+            { texto: "Um software de edição de imagens", correta: false }
+        ],
+        explicacao: "✅ Perfeito! HTML é de MARCAÇÃO, não de programação. Ele 'marca' cada parte do conteúdo: isto é um título, isto é um parágrafo...",
+        dicaErro: "💡 Dica: Linguagem de programação tem lógica e cálculos. HTML só ORGANIZA o conteúdo, não calcula nada.",
+        desafio: "Digite o que HTML faz: estrutura ou decoração?",
+        respostaDesafio: "estrutura",
+        dicaDesafio: "💡 Dica: Cores e decoração é com o CSS. HTML é a base, o esqueleto."
+    },
+    {
+        tema: "📘 TEMA 1 — O que é HTML e para que serve",
+        pergunta: "O HTML é responsável por qual parte de um site?",
+        opcoes: [
+            { texto: "A estilização e cores", correta: false },
+            { texto: "A lógica e cálculos", correta: false },
+            { texto: "A estrutura e o conteúdo", correta: true },
+            { texto: "A animação e efeitos", correta: false }
+        ],
+        explicacao: "✅ Isso mesmo! HTML = ESTRUTURA. Cores e estilos → CSS. Lógica e ações → JavaScript.",
+        dicaErro: "💡 Dica: Lembra da regra de ouro: HTML=estrutura, CSS=estilo, JavaScript=comportamento.",
+        desafio: "Complete: HTML é a ____ da casa.",
+        respostaDesafio: "estrutura",
+        dicaDesafio: "💡 Dica: Pense numa casa: fundação, paredes, quartos — isso é a estrutura."
+    },
+    {
+        tema: "📘 TEMA 1 — O que é HTML e para que serve",
+        pergunta: "Quem criou o HTML e em que contexto?",
+        opcoes: [
+            { texto: "Tim Berners-Lee, para compartilhar documentos entre cientistas", correta: true },
+            { texto: "Bill Gates, para vender softwares", correta: false },
+            { texto: "Steve Jobs, para o iPhone", correta: false },
+            { texto: "Um grupo de brasileiros, para a internet gratuita", correta: false }
+        ],
+        explicacao: "✅ Exato! Tim Berners-Lee criou em 1991 no CERN para facilitar o compartilhamento de estudos entre pesquisadores.",
+        dicaErro: "💡 Dica: Não foi criado por nenhuma empresa! Nasceu num laboratório de ciência na Europa.",
+        desafio: "Digite o nome de quem criou a Web e o HTML:",
+        respostaDesafio: "Tim Berners-Lee",
+        dicaDesafio: "💡 Dica: É um nome próprio. Tim = primeiro nome, Berners-Lee = sobrenome completo."
+    },
+    {
+        tema: "📗 TEMA 2 — Estrutura básica do documento",
+        pergunta: "Qual é a ordem CORRETA da estrutura principal de um documento HTML?",
+        opcoes: [
+            { texto: "<html> → <head> → <body>", correta: true },
+            { texto: "<body> → <head> → <html>", correta: false },
+            { texto: "<head> → <html> → <body>", correta: false },
+            { texto: "<html> → <body> → <head>", correta: false }
+        ],
+        explicacao: "✅ Perfeito! A ordem é: <html> (tudo começa aqui) → <head> (informações técnicas/ocultas) → <body> (o que aparece na tela).",
+        dicaErro: "💡 Dica: Pense: TODO o documento → CABEÇA → CORPO. A cabeça vem antes do corpo!",
+        desafio: "Digite a tag que envolve TODO o documento HTML:",
+        respostaDesafio: "<html>",
+        dicaDesafio: "💡 Dica: Abre com sinal de menor, nome da tag e sinal de maior. É a 'caixa' de fora."
+    },
+    {
+        tema: "📗 TEMA 2 — Estrutura básica do documento",
+        pergunta: "Para que serve a tag <!DOCTYPE html> na primeira linha?",
+        opcoes: [
+            { texto: "Define o tipo de documento e a versão do HTML", correta: true },
+            { texto: "É o título da página", correta: false },
+            { texto: "É uma decoração sem função", correta: false },
+            { texto: "Avisa que o arquivo acabou", correta: false }
+        ],
+        explicacao: "✅ Correto! Ela diz ao navegador: 'Isso aqui é um documento HTML5!' Sem ela, o navegador pode interpretar errado.",
+        dicaErro: "💡 Dica: DOCTYPE = 'Tipo de Documento'. É uma instrução obrigatória na PRIMEIRA linha.",
+        desafio: "Digite a primeira linha obrigatória de um arquivo HTML5:",
+        respostaDesafio: "<!DOCTYPE html>",
+        dicaDesafio: "💡 Dica: Tem exclamação depois do < e termina com 'html>' tudo junto."
+    },
+    {
+        tema: "📗 TEMA 2 — Estrutura básica do documento",
+        pergunta: "O que vai DENTRO da tag <head>?",
+        opcoes: [
+            { texto: "O conteúdo visível da página", correta: false },
+            { texto: "Títulos, estilos, meta-informações — coisas que não aparecem diretamente", correta: true },
+            { texto: "Imagens e parágrafos", correta: false },
+            { texto: "Somente o rodapé", correta: false }
+        ],
+        explicacao: "✅ Isso! O <head> contém o título da aba, configurações, links de CSS... tudo que é 'nos bastidores'.",
+        dicaErro: "💡 Dica: HEAD = informação técnica, invisível. O que aparece na tela vai no BODY.",
+        desafio: "Digite a tag que contém o título da página (aparece na aba do navegador):",
+        respostaDesafio: "<title>",
+        dicaDesafio: "💡 Dica: 'Title' em inglês significa Título. Abre e fecha com os símbolos < >."
+    },
+    {
+        tema: "📗 TEMA 2 — Estrutura básica do documento",
+        pergunta: "Tudo que a pessoa VÊ na página fica dentro de qual tag?",
+        opcoes: [
+            { texto: "<head>", correta: false },
+            { texto: "<body>", correta: true },
+            { texto: "<html>", correta: false },
+            { texto: "<corpo>", correta: false }
+        ],
+        explicacao: "✅ Muito bem! O <body> é o corpo da página — imagens, textos, botões... tudo que você vê vai aqui!",
+        dicaErro: "💡 Dica: BODY = CORPO. Tudo que é visível ao visitante está dentro dele.",
+        desafio: "Digite a tag onde fica TODO o conteúdo visível:",
+        respostaDesafio: "<body>",
+        dicaDesafio: "💡 Dica: 'Body' = Corpo em inglês. É aqui que mora tudo que aparece na tela."
+    },
+    {
+        tema: "📕 TEMA 3 — Tags, Elementos e Atributos",
+        pergunta: "O que é uma TAG no HTML?",
+        opcoes: [
+            { texto: "Um rótulo que marca o início e fim de um elemento", correta: true },
+            { texto: "Um comentário no código", correta: false },
+            { texto: "Uma senha para acessar a página", correta: false },
+            { texto: "Um tipo de cor", correta: false }
+        ],
+        explicacao: "✅ Certo! As tags são os marcadores: abrem com <tag> e fecham com </tag>. Elas dizem ao navegador 'isso aqui é um título, isso é uma imagem'.",
+        dicaErro: "💡 Dica: Tag = etiqueta/marcador. É o comando que diz ao navegador o que cada coisa é.",
+        desafio: "Digite a tag de ABERTURA de um parágrafo:",
+        respostaDesafio: "<p>",
+        dicaDesafio: "💡 Dica: Parágrafo em inglês é 'Paragraph', por isso a letra p. Abre e fecha com < >."
+    },
+    {
+        tema: "📕 TEMA 3 — Tags, Elementos e Atributos",
+        pergunta: "O que é um ELEMENTO HTML?",
+        opcoes: [
+            { texto: "A tag de abertura + conteúdo + tag de fechamento", correta: true },
+            { texto: "Apenas o texto dentro da tag", correta: false },
+            { texto: "Somente a tag de fechamento", correta: false },
+            { texto: "Um atributo qualquer", correta: false }
+        ],
+        explicacao: "✅ Perfeito! Elemento = conjunto completo: <h1>Olá</h1> → tag de abertura + conteúdo + tag de fechamento.",
+        dicaErro: "💡 Dica: Elemento é o PACOTE completo. Não é só uma parte, é tudo junto: abertura, meio e fechamento.",
+        desafio: "Complete: Um elemento é formado por abertura + ____ + fechamento.",
+        respostaDesafio: "conteúdo",
+        dicaDesafio: "💡 Dica: É o que fica no meio da tag de abertura e de fechamento — o texto, a imagem, o valor."
+    },
+    {
+        tema: "📕 TEMA 3 — Tags, Elementos e Atributos",
+        pergunta: "O que são ATRIBUTOS em uma tag?",
+        opcoes: [
+            { texto: "Informações extras que configuram o elemento (ex: tamanho, cor, link)", correta: true },
+            { texto: "A beleza da tag", correta: false },
+            { texto: "O nome da tag", correta: false },
+            { texto: "O fechamento da tag", correta: false }
+        ],
+        explicacao: "✅ Isso! Atributos dão características extras. Exemplo: <img src='foto.jpg'> — 'src' é o atributo que diz ONDE está a imagem.",
+        dicaErro: "💡 Dica: Atributo = 'detalhe técnico'. Vem DENTRO da tag de abertura e tem formato: nome='valor'.",
+        desafio: "Digite o atributo que define o endereço de um link (<a ____='url'>):",
+        respostaDesafio: "href",
+        dicaDesafio: "💡 Dica: Hypertext Reference = referência de hipertexto. São 4 letras: h-r-e-f."
+    },
+    {
+        tema: "📕 TEMA 3 — Tags, Elementos e Atributos",
+        pergunta: "Identifique corretamente: em <a href='pagina.html'>Texto</a> — qual é o atributo e qual é o valor?",
+        opcoes: [
+            { texto: "Atributo = href / Valor = pagina.html", correta: true },
+            { texto: "Atributo = pagina.html / Valor = href", correta: false },
+            { texto: "Atributo = a / Valor = Texto", correta: false },
+            { texto: "Atributo = Texto / Valor = pagina.html", correta: false }
+        ],
+        explicacao: "✅ Muito bem! Padrão: nome-do-atributo='valor'. O atributo é a PROPRIEDADE, o valor é o CONTEÚDO dela.",
+        dicaErro: "💡 Dica: Sempre segue: nome-do-atributo = 'valor'. O nome vem ANTES do sinal de igual.",
+        desafio: "Digite o atributo que dá um nome de identificação ÚNICO a um elemento:",
+        respostaDesafio: "id",
+        dicaDesafio: "💡 Dica: É só duas letras. Serve para identificar um elemento sozinho, sem repetir."
+    },
+    {
+        tema: "📙 TEMA 4 — Comentários no código",
+        pergunta: "Como se escreve um COMENTÁRIO no HTML?",
+        opcoes: [
+            { texto: "<!-- Este é um comentário -->", correta: true },
+            { texto: "// Este é um comentário", correta: false },
+            { texto: "/* Este é um comentário */", correta: false },
+            { texto: "## Este é um comentário", correta: false }
+        ],
+        explicacao: "✅ Correto! <!-- texto --> é a marcação. O navegador IGNORA tudo que estiver dentro — não aparece na tela!",
+        dicaErro: "💡 Dica: No HTML usa-se: menor, exclamação, dois traços, o texto, dois traços, maior. // é de outras linguagens!",
+        desafio: "Digite APENAS o início de um comentário HTML:",
+        respostaDesafio: "<!--",
+        dicaDesafio: "💡 Dica: Menor que, exclamação, dois traços seguidos. Sem espaços entre eles."
+    },
+    {
+        tema: "📙 TEMA 4 — Comentários no código",
+        pergunta: "Para que servem os comentários no HTML?",
+        opcoes: [
+            { texto: "Para anotar explicações, lembretes e organizar o código — sem aparecer na página", correta: true },
+            { texto: "Para deixar o texto colorido na página", correta: false },
+            { texto: "Para bloquear a página", correta: false },
+            { texto: "Para o navegador ler em voz alta", correta: false }
+        ],
+        explicacao: "✅ Exato! Comentários são para VOCÊ e outros programadores — servem para explicar o código, lembrar de algo ou 'esconder' um trecho temporariamente.",
+        dicaErro: "💡 Dica: Comentário é INVISÍVEL ao visitante. Serve como bilhete para quem estuda o código.",
+        desafio: "Comentário aparece para o visitante? Responda sim ou não:",
+        respostaDesafio: "não",
+        dicaDesafio: "💡 Dica: O navegador ignora completamente. A pessoa que só vê a página nunca vai ver."
+    },
+    {
+        tema: "📙 TEMA 4 — Comentários no código",
+        pergunta: "O que acontece com o conteúdo dentro de <!-- isto -->?",
+        opcoes: [
+            { texto: "O navegador ignora completamente — não é exibido", correta: true },
+            { texto: "Aparece em cinza na tela", correta: false },
+            { texto: "Apaga o código ao lado", correta: false },
+            { texto: "Deixa o texto invisível mas ocupa espaço", correta: false }
+        ],
+        explicacao: "✅ Perfeito! É como se não existisse para o navegador. Ele pula direto.",
+        dicaErro: "💡 Dica: Não aparece, não ocupa espaço, não atrapalha. É como se não estivesse ali.",
+        desafio: "Para comentar várias linhas, usa-se a mesma marcação? Sim ou não?",
+        respostaDesafio: "sim",
+        dicaDesafio: "💡 Dica: Abre uma vez, fecha no fim. Tudo que estiver no meio vira comentário, quantas linhas forem."
+    },
+    {
+        tema: "📙 TEMA 4 — Comentários no código",
+        pergunta: "Qual é a utilidade prática dos comentários no dia a dia do programador?",
+        opcoes: [
+            { texto: "Explicar o código, lembrar o que fez e desativar trechos sem apagar", correta: true },
+            { texto: "Aumentar o tamanho do arquivo", correta: false },
+            { texto: "Deixar o código mais lento", correta: false },
+            { texto: "Proteger contra vírus", correta: false }
+        ],
+        explicacao: "✅ Isso! Os 3 usos principais: 1) Explicar, 2) Lembrar, 3) Testar sem apagar (comenta um pedaço e vê o que acontece).",
+        dicaErro: "💡 Dica: É uma ferramenta de ORGANIZAÇÃO. Ajuda você a entender o que fez quando voltar ao código depois.",
+        desafio: "Digite o FECHAMENTO de um comentário HTML:",
+        respostaDesafio: "-->",
+        dicaDesafio: "💡 Dica: Dois traços seguidos e o sinal de maior. Fecha o comentário que você abriu antes."
+    }
+];
+
+// =====================================================
+// LÓGICA DO JOGO + SALVAMENTO + TELA FINAL
+// =====================================================
+let indiceAtual = 0;
+let acertos = 0;
+let erros = 0;
+
+const areaQuestoes = document.getElementById('area-questoes');
+const barra = document.getElementById('barra');
+const contador = document.getElementById('contador');
+const spanAcertos = document.getElementById('acertos');
+const spanErros = document.getElementById('erros');
+const spanPorcentagem = document.getElementById('porcentagem');
+const total = questoes.length;
+
+// ========== SALVAR E CARREGAR PROGRESSO ==========
+function salvarProgresso() {
+    const dados = { indiceAtual, acertos, erros };
+    localStorage.setItem('questionario-html-progresso', JSON.stringify(dados));
+}
+
+function carregarProgresso() {
+    const salvo = localStorage.getItem('questionario-html-progresso');
+    if (salvo) {
+        const dados = JSON.parse(salvo);
+        indiceAtual = dados.indiceAtual || 0;
+        acertos = dados.acertos || 0;
+        erros = dados.erros || 0;
+    }
+}
+
+// ========== REINICIAR DO ZERO ==========
+function reiniciarTudo() {
+    indiceAtual = 0;
+    acertos = 0;
+    erros = 0;
+    localStorage.removeItem('questionario-html-progresso');
+    atualizarPainel();
+    renderizarQuestao();
+}
+
+// ========== BOTÕES DE NAVEGAÇÃO ==========
+document.getElementById('btn-voltar').addEventListener('click', function(e) {
+    e.preventDefault();
+    if (indiceAtual > 0) {
+        indiceAtual--;
+        salvarProgresso();
+        atualizarPainel();
+        renderizarQuestao();
+    } else {
+        alert('⚠️ Você já está na primeira questão!');
+    }
+});
+
+document.getElementById('btn-inicio').addEventListener('click', function(e) {
+    e.preventDefault();
+    if (confirm('🏠 Tem certeza que deseja voltar ao início? Todo o progresso será reiniciado!')) {
+        reiniciarTudo();
+    }
+});
+
+function atualizarPainel() {
+    contador.textContent = indiceAtual;
+    spanAcertos.textContent = acertos;
+    spanErros.textContent = erros;
+    const porcent = indiceAtual > 0 ? Math.round((acertos / indiceAtual) * 100) : 0;
+    spanPorcentagem.textContent = porcent + '%';
+    barra.style.width = `${(indiceAtual / total) * 100}%`;
+}
+
+// ========== TELA FINAL — PARABÉNS + MOTIVAÇÃO ==========
+function mostrarTelaFinal() {
+    salvarProgresso();
+    const aproveitamento = Math.round((acertos / total) * 100);
+    let mensagemMotivacao = '';
+
+    if (aproveitamento >= 90) {
+        mensagemMotivacao = `
+            🎇 INCRÍVEL! Você é um verdadeiro MESTRE do HTML! 🎇<br><br>
+            🌟 Dedicação e esforço trazem resultados extraordinários.<br>
+            🌟 Você está mais do que preparado para avançar rumo ao CSS!<br>
+            🌟 Continue assim — o sucesso é uma consequência do seu trabalho!
+        `;
+    } else if (aproveitamento >= 70) {
+        mensagemMotivacao = `
+            🎉 MUITO BEM! Você dominou o conteúdo com excelência! 🎉<br><br>
+            💪 Você está no caminho certo! Cada estudo te aproxima mais do objetivo.<br>
+            💪 Com mais um pouco de prática, vai dominar tudo completamente.<br>
+            💪 Siga em frente — você é capaz de MUITO mais!
+        `;
+    } else if (aproveitamento >= 50) {
+        mensagemMotivacao = `
+            👏 PARABÉNS! Você concluiu o aprendizado! 👏<br><br>
+            📚 O progresso vem com a prática. Revise os pontos que errou e vai brilhar!<br>
+            📚 Cada tentativa te deixa mais forte. Não desista — persistência é o caminho!<br>
+            📚 Você consegue! Revise e tente de novo — vai se surpreender consigo mesmo.
+        `;
+    } else {
+        mensagemMotivacao = `
+            🌱 VOCÊ CONCLUIU! Isso já é uma GRANDE conquista! 🌱<br><br>
+            💡 O aprendizado é passo a passo. Errar faz PARTE do processo!<br>
+            💡 Revise, estude com calma e volte mais forte.<br>
+            💡 O único erro de verdade é desistir. Você consegue! Acredite em si mesmo!
+        `;
+    }
+
+    areaQuestoes.innerHTML = `
+        <div class="card tela-final">
+            <h2>🎉 PARABÉNS! Você Concluiu! 🎉</h2>
+            <div class="resultado">
+                <p>✅ Acertos: <strong>${acertos}</strong> de ${total}</p>
+                <p>❌ Erros: <strong>${erros}</strong></p>
+                <p style="font-size:1.6rem; color:#4caf50; margin-top:10px;">📈 Aproveitamento: <strong>${aproveitamento}%</strong></p>
+            </div>
+            <div class="motivacao">${mensagemMotivacao}</div>
+            <button class="btn btn-reiniciar" onclick="reiniciarTudo()">🔄 REINICIAR</button>
+        </div>
+    `;
+    localStorage.removeItem('questionario-html-progresso');
+}
+
+function renderizarQuestao() {
+    salvarProgresso();
+
+    // ========== SE CHEGOU AO FIM → MOSTRA TELA FINAL ==========
+    if (indiceAtual >= questoes.length) {
+        mostrarTelaFinal();
+        return;
+    }
+
+    const q = questoes[indiceAtual];
+    areaQuestoes.innerHTML = `
+        <div class="card">
+            <span class="tema">${q.tema}</span>
+            <p class="pergunta">${indiceAtual+1}. ${q.pergunta}</p>
+            <div id="opcoes"></div>
+            <div id="feedback" class="feedback"></div>
+            <div id="desafio-area" class="desafio oculto">
+                <h4>✏️ DESAFIO PRÁTICO — Digite a resposta correta:</h4>
+                <p>${q.desafio}</p>
+                <input type="text" id="resposta-desafio" placeholder="Digite aqui...">
+                <br>
+                <button class="btn" onclick="verificarDesafio()">✅ Verificar</button>
+                <div id="resultado-desafio" class="resultado-desafio"></div>
+                <button class="btn proxima" id="btn-proxima" onclick="proximaQuestao()">➡️ Próxima Questão</button>
+            </div>
+        </div>
+    `;
+
+    const areaOpcoes = document.getElementById('opcoes');
+    q.opcoes.forEach((op, i) => {
+        const divOpcao = document.createElement('div');
+        divOpcao.className = 'opcao';
+        divOpcao.textContent = `${String.fromCharCode(65+i)}) ${op.texto}`;
+        divOpcao.onclick = () => escolherOpcao(op, divOpcao);
+        areaOpcoes.appendChild(divOpcao);
+    });
+}
+
+function escolherOpcao(opcao, elemento) {
+    document.querySelectorAll('.opcao').forEach(o => o.style.pointerEvents = 'none');
+    const feedback = document.getElementById('feedback');
+    const q = questoes[indiceAtual];
+
+    if (opcao.correta) {
+        elemento.classList.add('correta');
+        feedback.className = 'feedback certo';
+        feedback.innerHTML = `<span class="emoji">✅</span> ${q.explicacao}`;
+        acertos++;
+    } else {
+        elemento.classList.add('errada');
+        feedback.className = 'feedback errado';
+        feedback.innerHTML = `<span class="emoji">❌</span> ${q.dicaErro}<br><strong>A resposta certa foi destacada em verde.</strong>`;
+        erros++;
+        document.querySelectorAll('.opcao').forEach((el, i) => {
+            if (q.opcoes[i].correta) el.classList.add('correta');
+        });
+    }
+
+    feedback.style.display = 'block';
+    document.getElementById('desafio-area').classList.remove('oculto');
+    salvarProgresso();
+    atualizarPainel();
+}
+
+function verificarDesafio() {
+    const respostaUsuario = document.getElementById('resposta-desafio').value.trim();
+    const respostaCorreta = questoes[indiceAtual].respostaDesafio;
+    const resultado = document.getElementById('resultado-desafio');
+
+    if (respostaUsuario.toLowerCase() === respostaCorreta.toLowerCase()) {
+        resultado.innerHTML = '<span style="color:green;">✅ Correto! Você sabe digitar direitinho! 🎉</span>';
+        document.getElementById('btn-proxima').style.display = 'inline-block';
+    } else {
+        resultado.innerHTML = `<span style="color:red;">❌ Quase! A resposta certa é: <strong>${respostaCorreta}</strong></span>`;
+        resultado.innerHTML += `<br><span style="color:#ff9800;">💡 ${questoes[indiceAtual].dicaDesafio}</span>`;
+        resultado.innerHTML += `<br><span style="color:green;">Tente de novo! 💪</span>`;
+    }
+}
+
+function proximaQuestao() {
+    indiceAtual++;
+    salvarProgresso();
+    atualizarPainel();
+    renderizarQuestao();
+}
+
+// ========== INICIA CARREGANDO O PROGRESSO SALVO ==========
+carregarProgresso();
+atualizarPainel();
+renderizarQuestao();
+</script>
 </body>
 </html>
